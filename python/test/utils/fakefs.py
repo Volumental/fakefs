@@ -63,7 +63,7 @@ class InspectableBytesIO(io.BytesIO):
 
 
 class FakeFile(object):
-    def __init__(self, data: io.BytesIO) -> None:
+    def __init__(self, data: bytes) -> None:
         self.data = data
 
 
@@ -75,14 +75,14 @@ class FakeFilesystem(object):
     # Setup functions
     def add_file(self, path: str, data: str) -> None:
         p = os.path.normpath(path)
-        self.files[p] = FakeFile(io.BytesIO(data.encode('utf-8')))
+        self.files[p] = FakeFile(data.encode('utf-8'))
 
     # Fake functions
     def open(self, path: str, mode: str='r') -> Union[io.BytesIO, io.TextIOWrapper]:
         p = os.path.normpath(path)
         if mode.startswith('r'):
             if p in self.files:
-                data = self.files[p].data
+                data = io.BytesIO(self.files[p].data)
                 if 'b' in mode:
                     return data
                 return io.TextIOWrapper(data)
@@ -91,11 +91,12 @@ class FakeFilesystem(object):
 
         if mode.startswith('w'):
             # Add file
-            data = InspectableBytesIO()
-            self.files[p] = FakeFile(data=data)
+            f = InspectableBytesIO()
+            # TODO(samuel): Make it possible to read back data written during test.
+            self.files[p] = FakeFile(b'dummy')
             if 'b' in mode:
-                return data
-            return io.TextIOWrapper(data)
+                return f
+            return io.TextIOWrapper(f)
 
         raise ValueError("invalid mode: '{}'".format(mode))
 
