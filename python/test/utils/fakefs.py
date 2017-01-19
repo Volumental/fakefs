@@ -9,7 +9,7 @@ fs.add_file('file.txt', data='contents goes here')
 fs.monkey.patch()
 
 # Production code
-with open('file.txt') as f
+with open('file.txt') as f:
     print(f.read())
 """
 import builtins
@@ -108,7 +108,7 @@ class FakeFilesystem(object):
         s = os.path.normpath(source)
         t = os.path.normpath(target)
         if s not in self.files:
-            raise IOError("XXCould not copy '{}' to '{}'".format(s, t))
+            raise IOError("Could not copy '{}' to '{}'".format(s, t))
         self.files[t] = self.files[s]
 
     def rename(self, source: str, target: str) -> None:
