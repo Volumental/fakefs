@@ -40,6 +40,9 @@ class Monkey(object):
         self.original['os.rename'] = os.rename
         os.rename = self.fs.rename
 
+        self.original['os.makedirs'] = os.makedirs
+        os.makedirs = self.fs.makedirs
+
         return self
 
     def __enter__(self):
@@ -115,3 +118,7 @@ class FakeFilesystem(object):
         s = os.path.normpath(source)
         t = os.path.normpath(target)
         self.files[t] = self.files.pop(s)
+
+    def makedirs(self, path: str, mode: int=0o777, exists_ok: bool=False) -> None:
+        # Only files exists in the fake fs
+        pass
