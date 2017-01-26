@@ -12,52 +12,41 @@ fs.monkey.patch()
 with open('file.txt') as f:
     print(f.read())
 """
-import builtins
 import io
 import os
 
-import shutil
 from typing import Union, Callable
+
+from mock import patch
 
 
 class Monkey(object):
     def __init__(self, fs) -> None:
         self.fs = fs
         self.original = {}  # type: Dict[str, Callable]
+        self.patches = []  # type: List[patch]
 
     def patch(self):
         """Patches relevant functions in builtins, os, and shutil"""
-        # `patch`ing does not seem to work for whatever reason
-        self.original['open'] = builtins.open
-        builtins.open = self.fs.open
+        self.patches.append(patch('builtins.open', self.fs.open))
 
-        self.original['os.path.exists'] = os.path.exists
-        os.path.exists = self.fs.exists
+        self.patches.append(patch('os.path.exists', self.fs.exists))
+        self.patches.append(patch('os.path.isfile', self.fs.isfile))
 
-        self.original['shutil.copy'] = shutil.copy
-        shutil.copy = self.fs.copy
+        self.patches.append(patch('shutil.copy', self.fs.copy))
 
-        self.original['os.rename'] = os.rename
-        os.rename = self.fs.rename
-
-        self.original['os.makedirs'] = os.makedirs
-        os.makedirs = self.fs.makedirs
-
-        self.original['os.path.isfile'] = os.path.isfile
-        os.path.isfile = self.fs.isfile
+        self.patches.append(patch('os.rename', self.fs.rename))
+        self.patches.append(patch('os.makedirs', self.fs.makedirs))
 
         return self
 
     def __enter__(self):
-        pass
+        for p in self.patches:
+            p.start()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        builtins.open = self.original['open']
-        os.path.exists = self.original['os.path.exists']
-        shutil.copy = self.original['shutil.copy']
-        os.rename = self.original['os.rename']
-        os.makedirs = self.original['os.makedirs']
-        os.path.isfile = self.original['os.path.isfile']
+        for p in self.patches:
+            p.stop()
 
 
 class InspectableBytesIO(io.BytesIO):
