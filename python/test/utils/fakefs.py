@@ -56,6 +56,8 @@ class Monkey(object):
         os.path.exists = self.original['os.path.exists']
         shutil.copy = self.original['shutil.copy']
         os.rename = self.original['os.rename']
+        os.makedirs = self.original['os.makedirs']
+        os.path.isfile = self.original['os.path.isfile']
 
 
 class InspectableBytesIO(io.BytesIO):
