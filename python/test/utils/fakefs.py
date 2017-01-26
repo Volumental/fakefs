@@ -43,6 +43,9 @@ class Monkey(object):
         self.original['os.makedirs'] = os.makedirs
         os.makedirs = self.fs.makedirs
 
+        self.original['os.path.isfile'] = os.path.isfile
+        os.path.isfile = self.fs.isfile
+
         return self
 
     def __enter__(self):
@@ -122,3 +125,7 @@ class FakeFilesystem(object):
     def makedirs(self, path: str, mode: int=0o777, exists_ok: bool=False) -> None:
         # Only files exists in the fake fs
         pass
+
+    def isfile(self, path):
+        p = os.path.normpath(path)
+        return p in self.files
