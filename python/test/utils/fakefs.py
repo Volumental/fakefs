@@ -34,6 +34,7 @@ class Monkey(object):
         self.patches.append(patch('os.path.isfile', self.fs.isfile))
 
         self.patches.append(patch('shutil.copy', self.fs.copy))
+        self.patches.append(patch('shutil.chown', self.fs.chown))
 
         self.patches.append(patch('os.rename', self.fs.rename))
         self.patches.append(patch('os.makedirs', self.fs.makedirs))
@@ -108,6 +109,11 @@ class FakeFilesystem(object):
         if s not in self.files:
             raise IOError("Could not copy '{}' to '{}'".format(s, t))
         self.files[t] = self.files[s]
+
+    def chown(self, path: str, user: str, group: str=None):
+        p = os.path.normpath(path)
+        if p not in self.files:
+            raise FileNotFoundError("[Errno 2] No such file or directory: '{}'".format(path))
 
     def rename(self, source: str, target: str) -> None:
         s = os.path.normpath(source)
