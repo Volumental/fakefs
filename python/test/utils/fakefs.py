@@ -6,11 +6,11 @@
 # Setup
 fs = FakeFilesystem()
 fs.add_file('file.txt', data='contents goes here')
-fs.monkey.patch()
+with fs.monkey.patch():
 
-# Production code
-with open('file.txt') as f:
-    print(f.read())
+    # Production code
+    with open('file.txt') as f:
+        print(f.read())
 """
 import io
 import os
@@ -50,12 +50,13 @@ class Monkey(object):
 
 
 class InspectableBytesIO(io.BytesIO):
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, onclose=None, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.the_value = None  # type: bytes
+        self.onclose = onclose
 
     def close(self) -> None:
-        self.the_value = self.getvalue()
+        if self.onclose:
+            self.onclose(self.getvalue())
         super(InspectableBytesIO, self).close()
 
 
@@ -88,9 +89,9 @@ class FakeFilesystem(object):
 
         if mode.startswith('w'):
             # Add file
-            f = InspectableBytesIO()
-            # TODO(samuel): Make it possible to read back data written during test.
-            self.files[p] = FakeFile(b'dummy')
+            def store_file(content):
+                self.files[p] = FakeFile(content)
+            f = InspectableBytesIO(store_file)
             if 'b' in mode:
                 return f
             return io.TextIOWrapper(f)
