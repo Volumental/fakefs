@@ -32,13 +32,14 @@ class Monkey(object):
 
         self.patches.append(patch('os.path.exists', self.fs.exists))
         self.patches.append(patch('os.path.isfile', self.fs.isfile))
-        self.patches.append(patch('os.remove', self.fs.remove))
+        self.patches.append(patch('os.path.getsize', self.fs.getsize))
 
         self.patches.append(patch('shutil.copy', self.fs.copy))
         self.patches.append(patch('shutil.chown', self.fs.chown))
 
         self.patches.append(patch('os.rename', self.fs.rename))
         self.patches.append(patch('os.makedirs', self.fs.makedirs))
+        self.patches.append(patch('os.remove', self.fs.remove))
 
         return self
 
@@ -128,6 +129,12 @@ class FakeFilesystem(object):
     def isfile(self, path):
         p = os.path.normpath(path)
         return p in self.files
+
+    def getsize(self, path):
+        p = os.path.normpath(path)
+        if p not in self.files:
+            raise FileNotFoundError("[Errno 2] No such file or directory: '{}'".format(path))
+        return len(self.files[p].data)
 
     def remove(self, path):
         p = os.path.normpath(path)
