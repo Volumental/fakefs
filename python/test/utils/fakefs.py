@@ -15,7 +15,7 @@ with fs.monkey.patch():
 import io
 import os
 
-from typing import Union, Callable
+from typing import Callable, Dict, List, Union
 
 from mock import patch
 
