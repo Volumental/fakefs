@@ -33,13 +33,16 @@ class Monkey(object):
         self.patches.append(patch('os.path.exists', self.fs.exists))
         self.patches.append(patch('os.path.isfile', self.fs.isfile))
         self.patches.append(patch('os.path.getsize', self.fs.getsize))
+        self.patches.append(patch('os.path.isdir', self.fs.isdir))
 
         self.patches.append(patch('shutil.copy', self.fs.copy))
         self.patches.append(patch('shutil.chown', self.fs.chown))
+        self.patches.append(patch('shutil.rmtree', self.fs.rmtree))
 
         self.patches.append(patch('os.rename', self.fs.rename))
         self.patches.append(patch('os.makedirs', self.fs.makedirs))
         self.patches.append(patch('os.remove', self.fs.remove))
+        self.patches.append(patch('os.listdir', self.fs.listdir))
 
         return self
 
@@ -117,12 +120,17 @@ class FakeFilesystem(object):
         if p not in self.files:
             raise FileNotFoundError("[Errno 2] No such file or directory: '{}'".format(path))
 
+    def rmtree(self, path):
+        p = os.path.normpath(path)
+        self.files = {key: value for key, value in self.files.items() if not key.startswith(p)}
+
     def rename(self, source: str, target: str) -> None:
         s = os.path.normpath(source)
         t = os.path.normpath(target)
         self.files[t] = self.files.pop(s)
 
     def makedirs(self, path: str, mode: int=0o777, exists_ok: bool=False) -> None:
+        # TODO(niko or samuel): Proper directory support
         # Only files exists in the fake fs
         pass
 
@@ -136,8 +144,32 @@ class FakeFilesystem(object):
             raise FileNotFoundError("[Errno 2] No such file or directory: '{}'".format(path))
         return len(self.files[p].data)
 
+    def isdir(self, path):
+        # TODO(niko or samuel): Proper directory support
+        p = os.path.normpath(path)
+        if p in self.files:
+            return False
+        return any(file.startswith(p) for file in self.files.keys())
+
     def remove(self, path):
         p = os.path.normpath(path)
         if p not in self.files:
             raise FileNotFoundError("[Errno 2] No such file or directory: '{}'".format(path))
         del self.files[p]
+
+    def listdir(self, path):
+        def first_segment(subpath):
+            dirname, basename = os.path.split(subpath)
+            if not dirname or dirname == '/':
+                return basename
+            return first_segment(dirname)
+
+        # list dir also supports passing a file descriptor to directory
+        if isinstance(path, int):
+            return []
+
+        p = os.path.normpath(path)
+
+        # Handle files
+        suffixes = [f[len(p):] for f in self.files.keys() if f.startswith(p)]
+        return [first_segment(suff) for suff in suffixes]
