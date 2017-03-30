@@ -164,7 +164,7 @@ class FakeFilesystem(object):
                 return basename
             return first_segment(dirname)
 
-        # list dir also supports passing a file descriptor to directory
+        # listdir also supports passing a file descriptor to directory
         if isinstance(path, int):
             return []
 
