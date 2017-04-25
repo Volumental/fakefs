@@ -42,6 +42,7 @@ class Monkey(object):
         self.patches.append(patch('os.rename', self.fs.rename))
         self.patches.append(patch('os.makedirs', self.fs.makedirs))
         self.patches.append(patch('os.remove', self.fs.remove))
+        self.patches.append(patch('os.stat', self.fs.stat))
         self.patches.append(patch('os.listdir', self.fs.listdir))
 
         return self
@@ -69,6 +70,11 @@ class InspectableBytesIO(io.BytesIO):
 class FakeFile(object):
     def __init__(self, data: bytes) -> None:
         self.data = data
+
+
+class FakeStat(object):
+    def __init__(self, path):
+        self.st_mtime = 0
 
 
 class FakeFilesystem(object):
@@ -156,6 +162,12 @@ class FakeFilesystem(object):
         if p not in self.files:
             raise FileNotFoundError("[Errno 2] No such file or directory: '{}'".format(path))
         del self.files[p]
+
+    def stat(self, path):
+        p = os.path.normpath(path)
+        if p not in self.files:
+            raise FileNotFoundError("[Errno 2] No such file or directory: '{}'".format(path))
+        return FakeStat(p)
 
     def listdir(self, path):
         def first_segment(subpath):
