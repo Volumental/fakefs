@@ -14,7 +14,9 @@ with fs.monkey.patch():
 """
 import io
 import os
+import tempfile
 from typing import Callable, Dict, List, Union
+import uuid
 
 from mock import patch
 
@@ -43,6 +45,7 @@ class Monkey(object):
         self.patches.append(patch('os.remove', self.fs.remove))
         self.patches.append(patch('os.stat', self.fs.stat))
         self.patches.append(patch('os.listdir', self.fs.listdir))
+        self.patches.append(patch('tempfile.TemporaryDirectory', FakedTemporaryDirectory))
 
         return self
 
@@ -53,7 +56,6 @@ class Monkey(object):
     def __exit__(self, exc_type, exc_val, exc_tb):
         for p in self.patches:
             p.stop()
-
 
 class InspectableBytesIO(io.BytesIO):
     def __init__(self, onclose=None, *args, **kwargs) -> None:
@@ -74,6 +76,13 @@ class FakeFile(object):
 class FakeStat(object):
     def __init__(self, path):
         self.st_mtime = 0
+
+
+def _make_dummy_file_in_dir(dirname):
+    dummy_filepath = os.path.join(dirname, 'dummy_file')
+    with open(dummy_filepath, 'w'):
+        pass
+    return dummy_filepath
 
 
 class FakeFilesystem(object):
@@ -138,6 +147,7 @@ class FakeFilesystem(object):
     def makedirs(self, path: str, mode: int = 0o777, exists_ok: bool = False) -> None:
         # TODO(niko or samuel): Proper directory support
         # Only files exists in the fake fs
+        _make_dummy_file_in_dir(path)
         pass
 
     def isfile(self, path):
@@ -151,9 +161,6 @@ class FakeFilesystem(object):
         return len(self.files[p].data)
 
     def isdir(self, path):
-        # Temp dirs are always ok
-        if path.startswith('/tmp/'):
-            return True
         # TODO(niko or samuel): Proper directory support
         p = os.path.normpath(path)
         if p in self.files:
@@ -188,3 +195,17 @@ class FakeFilesystem(object):
         # Handle files
         suffixes = [f[len(p):] for f in self.files.keys() if f.startswith(p)]
         return [first_segment(suff) for suff in suffixes]
+
+
+class FakedTemporaryDirectory(object):
+    def __enter__(self):
+        self.dirname = os.path.join(tempfile.gettempdir(), str(uuid.uuid4()))
+
+        # No directory support in fakefs. Faking by adding a file
+        self.dummy_filepath = _make_dummy_file_in_dir(self.dirname)
+        return self.dirname
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        os.remove(self.dummy_filepath)
+        self.dirname = None
+        self.dummy_filepath = None
