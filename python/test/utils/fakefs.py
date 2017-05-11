@@ -78,13 +78,6 @@ class FakeStat(object):
         self.st_mtime = 0
 
 
-def _make_dummy_file_in_dir(dirname):
-    dummy_filepath = os.path.join(dirname, 'dummy_file')
-    with open(dummy_filepath, 'w'):
-        pass
-    return dummy_filepath
-
-
 class FakeFilesystem(object):
     def __init__(self) -> None:
         self.files = {}  # type: Dict[str, FakeFile]
@@ -147,8 +140,8 @@ class FakeFilesystem(object):
     def makedirs(self, path: str, mode: int = 0o777, exists_ok: bool = False) -> None:
         # TODO(niko or samuel): Proper directory support
         # Only files exists in the fake fs
-        _make_dummy_file_in_dir(path)
-        pass
+        dummy_filepath = os.path.join(path, 'dummy_file')
+        self.add_file(dummy_filepath, data='')
 
     def isfile(self, path):
         p = os.path.normpath(path)
@@ -202,7 +195,9 @@ class FakedTemporaryDirectory(object):
         self.dirname = os.path.join(tempfile.gettempdir(), str(uuid.uuid4()))
 
         # No directory support in fakefs. Faking by adding a file
-        self.dummy_filepath = _make_dummy_file_in_dir(self.dirname)
+        self.dummy_filepath = os.path.join(self.dirname, 'dummy_file')
+        with open(self.dummy_filepath):
+            pass
         return self.dirname
 
     def __exit__(self, exc_type, exc_val, exc_tb):
