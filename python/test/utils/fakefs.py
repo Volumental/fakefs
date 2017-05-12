@@ -196,7 +196,7 @@ class FakedTemporaryDirectory(object):
 
         # No directory support in fakefs. Faking by adding a file
         self.dummy_filepath = os.path.join(self.dirname, 'dummy_file')
-        with open(self.dummy_filepath):
+        with open(self.dummy_filepath, 'w'):
             pass
         return self.dirname
 
