@@ -115,7 +115,7 @@ class FakeFilesystem(object):
             def append_file(content):
                 self.files[p] = FakeFile(content)
 
-            f = InspectableBytesIO(store_file)
+            f = InspectableBytesIO(append_file)
             if 'b' in mode:
                 return f
             return io.TextIOWrapper(f)
