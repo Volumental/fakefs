@@ -109,6 +109,16 @@ class FakeFilesystem(object):
             if 'b' in mode:
                 return f
             return io.TextIOWrapper(f)
+        
+        if mode.startswith('a'):
+            # Add file
+            def append_file(content):
+                self.files[p] = FakeFile(content)
+
+            f = InspectableBytesIO(store_file)
+            if 'b' in mode:
+                return f
+            return io.TextIOWrapper(f)
 
         raise ValueError("invalid mode: '{}'".format(mode))
 
