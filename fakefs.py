@@ -18,7 +18,7 @@ import tempfile
 from typing import Callable, Dict, List, Union
 import uuid
 
-from mock import patch
+from unittest.mock import patch
 
 
 class Monkey(object):
