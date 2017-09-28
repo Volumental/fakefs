@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# Copyright 2017 Volumental AB. CONFIDENTIAL. DO NOT REDISTRIBUTE.
 """Fake filesystem for easy mocking. Usage
 
 # Setup
