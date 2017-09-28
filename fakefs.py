@@ -41,6 +41,7 @@ class Monkey(object):
         self.patches.append(patch('shutil.rmtree', self.fs.rmtree))
 
         self.patches.append(patch('os.rename', self.fs.rename))
+        self.patches.append(patch('os.mkdir', self.fs.mkdir))
         self.patches.append(patch('os.makedirs', self.fs.makedirs))
         self.patches.append(patch('os.remove', self.fs.remove))
         self.patches.append(patch('os.stat', self.fs.stat))
@@ -147,6 +148,9 @@ class FakeFilesystem(object):
         t = os.path.normpath(target)
         self.files[t] = self.files.pop(s)
 
+    def mkdir(self, path: str, mode: int = 0o777) -> None:
+       self.makedirs(path, mode)
+ 
     def makedirs(self, path: str, mode: int = 0o777, exists_ok: bool = False) -> None:
         # TODO(niko or samuel): Proper directory support
         # Only files exists in the fake fs
