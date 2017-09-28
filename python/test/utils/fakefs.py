@@ -150,8 +150,9 @@ class FakeFilesystem(object):
     def makedirs(self, path: str, mode: int = 0o777, exists_ok: bool = False) -> None:
         # TODO(niko or samuel): Proper directory support
         # Only files exists in the fake fs
-        dummy_filepath = os.path.join(path, 'dummy_file')
-        self.add_file(dummy_filepath, data='')
+        p = os.path.normpath(path)
+        # Create empty marker file in directory
+        self.files[os.path.join(p, '..mark')] = FakeFile(b'')
 
     def isfile(self, path):
         p = os.path.normpath(path)
