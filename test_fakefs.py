@@ -11,5 +11,10 @@ class FakeTestCase(unittest.TestCase):
     def test_open_write(self):
         with open('/a.txt', 'w') as f:
             f.write('abc')
-        assert_equal("abc", self.fs.content_for('/a.txt'))
+        assert_equal(b'abc', self.fs.content_for('/a.txt'))
     
+    def test_open_read(self):
+        self.fs.add_file('/x.txt', "xyz")
+        with open('/x.txt') as f:
+            data = f.read()
+        assert_equal("xyz", data)

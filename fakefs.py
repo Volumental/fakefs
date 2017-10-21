@@ -86,6 +86,10 @@ class FakeFilesystem(object):
         p = os.path.normpath(path)
         self.files[p] = FakeFile(data.encode('utf-8'))
 
+    # Assert functions
+    def content_for(self, path: str):
+        return self.files[path].data
+
     # Fake functions
     def open(self, path: str, mode: str = 'r') -> Union[io.BytesIO, io.TextIOWrapper]:
         p = os.path.normpath(path)
