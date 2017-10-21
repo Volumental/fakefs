@@ -2,7 +2,8 @@
 {
     "python.pythonPath": "python3",
     "python.unitTest.nosetestArgs": [
-        "."
+        "-m", "nose"
     ],
+    "python.unitTest.nosetestPath": "python3",
     "python.unitTest.nosetestsEnabled": true
 }
