@@ -1,6 +1,8 @@
 import unittest
 import fakefs
-from nose.tools import assert_equal
+from nose.tools import assert_equal, assert_true, assert_false
+
+import os
 
 class FakeTestCase(unittest.TestCase):
     def run(self, result=None):
@@ -18,3 +20,10 @@ class FakeTestCase(unittest.TestCase):
         with open('/x.txt') as f:
             data = f.read()
         assert_equal("xyz", data)
+
+    def test_exists_missing(self):
+        assert_false(os.path.exists('/nope'))
+    
+    def test_exists(self):
+        self.fs.add_file('/yup', '')
+        assert_true(os.path.exists('/yup'))
