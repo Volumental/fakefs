@@ -67,3 +67,12 @@ class FakeTestCase(unittest.TestCase):
     def test_listdir_single(self):
         self.fs.add_file('/single/file', '')
         assert_equal(os.listdir('/single'), ['file'])
+
+    @raises(FileNotFoundError)
+    def test_stat_missing(self):
+        os.stat('/nope')
+    
+    def test_stat(self):
+        self.fs.add_file('/file', '123')
+        stat = os.stat('/file')
+        assert_equal(stat.st_mtime, 0)
