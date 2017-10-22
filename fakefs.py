@@ -147,6 +147,9 @@ class FakeFilesystem(object):
     def rename(self, source: str, target: str) -> None:
         s = os.path.normpath(source)
         t = os.path.normpath(target)
+        if s not in self.files:
+            raise FileNotFoundError("[Errno 2] No such file or directory: '{}' -> '{}'".format(source, target))
+
         self.files[t] = self.files.pop(s)
 
     def mkdir(self, path: str, mode: int = 0o777) -> None:

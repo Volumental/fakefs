@@ -35,3 +35,23 @@ class FakeTestCase(unittest.TestCase):
     def test_getsiz(self):
         self.fs.add_file('/a', '123')
         assert_equal(os.path.getsize('/a'), 3)
+
+    def test_isdir_missing(self):
+        assert_false(os.path.isdir('/dir'))
+
+    def test_isdir_file(self):
+        self.fs.add_file('/file', '')
+        assert_false(os.path.isdir('/file'))
+
+    def test_isdir(self):
+        self.fs.add_file('/dir/file', '')
+        assert_true(os.path.isdir('/dir'))
+
+    @raises(FileNotFoundError)
+    def test_rename_missing(self):
+        os.rename('/nope', 'whatever')
+
+    def test_rename(self):
+        self.fs.add_file('/before', '')
+        os.rename('/before', '/after')
+        assert_true(os.path.isfile('/after'))
