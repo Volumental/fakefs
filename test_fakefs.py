@@ -12,8 +12,14 @@ class FakeTestCase(unittest.TestCase):
         self.fs = fakefs.FakeFilesystem()
         with self.fs.monkey.patch():
             super(FakeTestCase, self).run(result)
-
-    def test_open_write(self):
+    
+    def test_open_write_missing(self):
+        with open('/a.txt', 'w') as f:
+            f.write('abc')
+        assert_equal(b'abc', self.fs.content_for('/a.txt'))
+    
+    def test_open_write_existing(self):
+        self.fs.add_file('/a.txt', 'original')
         with open('/a.txt', 'w') as f:
             f.write('abc')
         assert_equal(b'abc', self.fs.content_for('/a.txt'))
@@ -23,6 +29,23 @@ class FakeTestCase(unittest.TestCase):
         with open('/x.txt') as f:
             data = f.read()
         assert_equal("xyz", data)
+
+    @raises(FileNotFoundError)
+    def test_open_read_missing(self):
+        with open('/x.txt') as f:
+            pass
+
+    def test_open_append_missing(self):
+        with open('/a.txt', 'a') as f:
+            f.write('abc')
+        assert_equal(b'abc', self.fs.content_for('/a.txt'))
+
+    def test_open_append_existing(self):
+        self.fs.add_file('/a.txt', 'abc')
+        with open('/a.txt', 'a') as f:
+            f.write('123')
+        assert_equal(b'abc123', self.fs.content_for('/a.txt'))
+
 
     def test_exists_missing(self):
         assert_false(os.path.exists('/nope'))

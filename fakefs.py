@@ -115,7 +115,10 @@ class FakeFilesystem(object):
         if mode.startswith('a'):
             # Add file
             def append_file(content):
-                self.files[p] = FakeFile(content)
+                if p in self.files:
+                    self.files[p] = FakeFile(self.files[p].data + content)
+                else:
+                    self.files[p] = FakeFile(content)
 
             f = InspectableBytesIO(append_file)
             if 'b' in mode:
