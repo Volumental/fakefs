@@ -55,3 +55,15 @@ class FakeTestCase(unittest.TestCase):
         self.fs.add_file('/before', '')
         os.rename('/before', '/after')
         assert_true(os.path.isfile('/after'))
+
+    @raises(FileNotFoundError)
+    def test_listdir_missing(self):
+        os.listdir('/nope')
+
+    def test_listdir_empty(self):
+        os.mkdir('/empty')
+        assert_equal(os.listdir('/empty'), [])
+
+    def test_listdir_single(self):
+        self.fs.add_file('/single/file', '')
+        assert_equal(os.listdir('/single'), ['file'])

@@ -204,9 +204,12 @@ class FakeFilesystem(object):
 
         p = os.path.normpath(path)
 
+        if not self.isdir(p):
+            raise FileNotFoundError("[Errno 2] No such file or directory: '{}'".format(path))
+
         # Handle files
         suffixes = [f[len(p):] for f in self.files.keys() if f.startswith(p)]
-        return [first_segment(suff) for suff in suffixes]
+        return [first_segment(suff) for suff in suffixes if not suff.endswith('..mark')]
 
 
 class FakedTemporaryDirectory(object):
