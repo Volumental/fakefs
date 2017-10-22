@@ -1,5 +1,6 @@
 # fakefs
 ![build status](https://travis-ci.org/Volumental/fakefs.svg?branch=master)
+[![codecov](https://codecov.io/gh/Volumental/fakefs/branch/master/graph/badge.svg)](https://codecov.io/gh/Volumental/fakefs)
 
 Introducing fakefs, easy faking the file system.
     
