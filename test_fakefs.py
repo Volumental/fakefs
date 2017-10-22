@@ -111,3 +111,10 @@ class FakeTestCase(unittest.TestCase):
         self.fs.add_file('/file', '')
         shutil.chown('/file', 'whatever')
         # chown just dummy, nothing to assert.
+
+    def test_rmtree(self):
+        self.fs.add_file('/dir/dir/file', '')
+        shutil.rmtree('/dir')
+        assert_false(os.path.isfile('/dir/dir/file'))
+        assert_false(os.path.isdir('/dir/dir'))
+        assert_false(os.path.isdir('/dir'))
