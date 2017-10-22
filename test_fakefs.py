@@ -4,6 +4,7 @@ from nose.tools import assert_equal, assert_true, assert_false, raises
 
 import os
 import shutil
+import tempfile
 
 
 class FakeTestCase(unittest.TestCase):
@@ -118,3 +119,8 @@ class FakeTestCase(unittest.TestCase):
         assert_false(os.path.isfile('/dir/dir/file'))
         assert_false(os.path.isdir('/dir/dir'))
         assert_false(os.path.isdir('/dir'))
+
+    # tempfile
+    def test_temporary_directory(self):
+        with tempfile.TemporaryDirectory() as name:
+            assert_true(os.path.isdir(name))
