@@ -45,7 +45,11 @@ class FakeTestCase(unittest.TestCase):
         with open('/a.txt', 'a') as f:
             f.write('123')
         assert_equal(b'abc123', self.fs.content_for('/a.txt'))
-
+        
+    @raises(ValueError)
+    def test_open_bad_mode(self):
+        with open('whatever', 'does not start with r, w, nor a'):
+            pass
 
     def test_exists_missing(self):
         assert_false(os.path.exists('/nope'))
