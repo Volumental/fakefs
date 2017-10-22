@@ -1,6 +1,6 @@
 import unittest
 import fakefs
-from nose.tools import assert_equal, assert_true, assert_false
+from nose.tools import assert_equal, assert_true, assert_false, raises
 
 import os
 
@@ -27,3 +27,11 @@ class FakeTestCase(unittest.TestCase):
     def test_exists(self):
         self.fs.add_file('/yup', '')
         assert_true(os.path.exists('/yup'))
+
+    @raises(FileNotFoundError)
+    def test_getsize_missing(self):
+        os.path.getsize('/a')
+
+    def test_getsiz(self):
+        self.fs.add_file('/a', '123')
+        assert_equal(os.path.getsize('/a'), 3)
