@@ -102,3 +102,12 @@ class FakeTestCase(unittest.TestCase):
         self.fs.add_file('/a', 'a')
         shutil.copy('/a', '/b')
         assert_equal(self.fs.content_for('/b'), b'a')
+
+    @raises(FileNotFoundError)
+    def test_chown_missing(self):
+        shutil.chown('/nope', 'whatever')
+
+    def test_chown(self):
+        self.fs.add_file('/file', '')
+        shutil.chown('/file', 'whatever')
+        # chown just dummy, nothing to assert.
